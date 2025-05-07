@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Face Recognition</h4>
+                </div>
+                <div class="card-body">
+                    <div class="video-container mb-3">
+                        <video id="video" autoplay muted class="w-100"></video>
+                    </div>
+                    <div class="controls">
+                        <button id="startBtn" class="btn btn-primary">Start Recognition</button>
+                        <button id="stopBtn" class="btn btn-danger" disabled>Stop Recognition</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Emotion Analysis</h4>
+                </div>
+                <div class="card-body">
+                    <div id="emotionResults">
+                        <p class="text-center">Start face recognition to see results</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let video = document.getElementById('video');
+    let startBtn = document.getElementById('startBtn');
+    let stopBtn = document.getElementById('stopBtn');
+    let emotionResults = document.getElementById('emotionResults');
+    let recognitionActive = false;
+
+    // Request camera access
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+            video.srcObject = stream;
+        })
+        .catch(err => {
+            console.error('Error accessing camera:', err);
+            alert('Error accessing camera. Please ensure you have granted camera permissions.');
+        });
+
+    startBtn.addEventListener('click', async () => {
+        try {
+            const response = await fetch('/face/start', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
+            if (data.status === 'success') {
+                recognitionActive = true;
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                updateEmotionResults();
+            } else {
+                alert('Error starting face recognition: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error starting face recognition');
+        }
+    });
+
+    stopBtn.addEventListener('click', async () => {
+        try {
+            const response = await fetch('/face/stop', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
+            if (data.status === 'success') {
+                recognitionActive = false;
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                emotionResults.innerHTML = '<p class="text-center">Face recognition stopped</p>';
+            } else {
+                alert('Error stopping face recognition: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error stopping face recognition');
+        }
+    });
+
+    async function updateEmotionResults() {
+        if (!recognitionActive) return;
+
+        try {
+            const response = await fetch('/face/emotion');
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                const emotions = data.emotions;
+                let html = '<div class="emotion-bars">';
+                
+                for (const [emotion, value] of Object.entries(emotions)) {
+                    const percentage = (value * 100).toFixed(1);
+                    html += `
+                        <div class="emotion-bar mb-2">
+                            <div class="d-flex justify-content-between">
+                                <span>${emotion.charAt(0).toUpperCase() + emotion.slice(1)}</span>
+                                <span>${percentage}%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" 
+                                     style="width: ${percentage}%" 
+                                     aria-valuenow="${percentage}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                html += '</div>';
+                emotionResults.innerHTML = html;
+            }
+        } catch (error) {
+            console.error('Error updating emotion results:', error);
+        }
+
+        // Update every 2 seconds
+        setTimeout(updateEmotionResults, 2000);
+    }
+</script>
+
+<style>
+    .video-container {
+        position: relative;
+        width: 100%;
+        padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+        background-color: #000;
+    }
+    
+    .video-container video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .emotion-bar {
+        margin-bottom: 10px;
+    }
+    
+    .progress {
+        height: 20px;
+    }
+    
+    .progress-bar {
+        background-color: #007bff;
+    }
+</style>
+{% endblock %} 

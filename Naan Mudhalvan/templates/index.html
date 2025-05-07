@@ -1,0 +1,2201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Health Analysis</title>
+    <!-- Critical CSS inline -->
+    <style>
+        :root {
+            --green-primary: #66BB6A;
+            --green-secondary: #4CAF50;
+            --green-light: #C8E6C9;
+            --green-lighter: #F1F8E9;
+            --green-dark: #43A047;
+            --green-text: #2E7D32;
+            --green-border: #A5D6A7;
+            --green-shadow: rgba(102, 187, 106, 0.15);
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--green-lighter);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .initial-button {
+            display: block;
+            margin: 50px auto;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            background-color: var(--green-primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .initial-button:hover {
+            background-color: var(--green-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--green-shadow);
+        }
+        #questionnaireSection {
+            display: none;
+        }
+        .question-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px var(--green-shadow);
+            border: 1px solid var(--green-border);
+        }
+        .question-card h5 {
+            color: var(--green-primary);
+            margin-bottom: 15px;
+        }
+        .question-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid var(--green-border);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-color: var(--green-lighter);
+        }
+        .option-label:hover {
+            background-color: var(--green-light);
+            transform: translateY(-1px);
+        }
+        .option-label input[type="radio"] {
+            margin-right: 10px;
+        }
+        .option-label.positive {
+            border-left: 4px solid var(--green-primary);
+        }
+        .option-label.neutral {
+            border-left: 4px solid var(--green-secondary);
+        }
+        .option-label.negative {
+            border-left: 4px solid var(--green-dark);
+        }
+        .submit-button {
+            background-color: var(--green-primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .submit-button:hover {
+            background-color: var(--green-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--green-shadow);
+        }
+        .submit-button:disabled {
+            background-color: var(--green-border);
+            cursor: not-allowed;
+            transform: none;
+        }
+        #results {
+            display: none;
+            margin-top: 30px;
+        }
+        .analysis-results {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px var(--green-shadow);
+            border: 1px solid var(--green-border);
+        }
+        .mental-health-status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: var(--green-lighter);
+            border: 1px solid var(--green-border);
+        }
+        .assistant-button {
+            display: block;
+            margin: 20px auto;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            background-color: var(--green-primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            max-width: 200px;
+        }
+        .assistant-button:hover {
+            background-color: var(--green-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--green-shadow);
+        }
+        #video {
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            width: 200px;
+            height: 150px;
+            border-radius: 10px;
+            object-fit: cover;
+            box-shadow: 0 4px 8px var(--green-shadow);
+            transition: opacity 0.3s;
+            border: 2px solid var(--green-primary);
+        }
+        #video.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .text-muted {
+            color: #6c757d !important;
+        }
+        .score-display {
+            background-color: var(--green-lighter);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid var(--green-border);
+        }
+        .score-breakdown {
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .case-classification {
+            background-color: var(--green-lighter);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid var(--green-border);
+        }
+        .case-details {
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .recommendations {
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .recommendations ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .recommendations li {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--green-border);
+        }
+        .recommendations li:last-child {
+            border-bottom: none;
+        }
+        .camera-indicator {
+            background-color: var(--green-primary);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
+        .camera-dot {
+            width: 10px;
+            height: 10px;
+            background-color: white;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+        
+        .camera-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--green-primary);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        .camera-toggle:hover {
+            background-color: var(--green-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--green-shadow);
+        }
+        .camera-toggle i {
+            font-size: 1.2em;
+        }
+        .emoji-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 5px 10px;
+            border-radius: 20px;
+            z-index: 1001;
+            transition: transform 0.3s ease;
+        }
+        .emoji-indicator:hover {
+            transform: scale(1.2);
+        }
+    </style>
+    <!-- Defer non-critical CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" media="print" onload="this.media='all'">
+</head>
+<body>
+    <div class="container">
+        <!-- Initial Button -->
+        <button id="initialButton" class="initial-button" onclick="startMentalAnalysis()">
+            Take the Mental Analysis Test
+        </button>
+
+        <!-- Questionnaire Section -->
+        <div id="questionnaireSection">
+            <h2 class="text-center mb-4">Mental Health Assessment</h2>
+            <form id="questionnaireForm">
+                <div class="question-card">
+                    <h5>1. How do you feel most days?</h5>
+                    <div class="question-options">
+                        <label class="option-label positive">
+                            <input type="radio" name="question_1" value="positive" required>
+                            Energized and full of vitality
+                        </label>
+                        <label class="option-label neutral">
+                            <input type="radio" name="question_1" value="neutral" required>
+                            Okay, neither particularly energized nor drained
+                        </label>
+                        <label class="option-label negative">
+                            <input type="radio" name="question_1" value="negative" required>
+                            Drained and lacking energy
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <h5>2. How often do you experience negative thought patterns?</h5>
+                    <div class="question-options">
+                        <label class="option-label positive">
+                            <input type="radio" name="question_2" value="positive" required>
+                            Rarely, I can usually maintain positive thoughts
+                        </label>
+                        <label class="option-label neutral">
+                            <input type="radio" name="question_2" value="neutral" required>
+                            Sometimes, but I can manage them
+                        </label>
+                        <label class="option-label negative">
+                            <input type="radio" name="question_2" value="negative" required>
+                            Frequently, I often get stuck in negative thought loops
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <h5>3. How would you rate your sleep quality?</h5>
+                    <div class="question-options">
+                        <label class="option-label positive">
+                            <input type="radio" name="question_3" value="positive" required>
+                            Excellent, I fall asleep easily and wake refreshed
+                        </label>
+                        <label class="option-label neutral">
+                            <input type="radio" name="question_3" value="neutral" required>
+                            Fair, I sleep okay but sometimes have trouble
+                        </label>
+                        <label class="option-label negative">
+                            <input type="radio" name="question_3" value="negative" required>
+                            Poor, I have significant trouble sleeping
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <h5>4. How connected do you feel to people around you?</h5>
+                    <div class="question-options">
+                        <label class="option-label positive">
+                            <input type="radio" name="question_4" value="positive" required>
+                            Very connected, I have strong relationships
+                        </label>
+                        <label class="option-label neutral">
+                            <input type="radio" name="question_4" value="neutral" required>
+                            Somewhat connected, but could improve
+                        </label>
+                        <label class="option-label negative">
+                            <input type="radio" name="question_4" value="negative" required>
+                            Often feel lonely and disconnected
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <h5>5. How do you typically treat yourself?</h5>
+                    <div class="question-options">
+                        <label class="option-label positive">
+                            <input type="radio" name="question_5" value="positive" required>
+                            With kindness and self-compassion
+                        </label>
+                        <label class="option-label neutral">
+                            <input type="radio" name="question_5" value="neutral" required>
+                            Fairly balanced, sometimes self-critical
+                        </label>
+                        <label class="option-label negative">
+                            <input type="radio" name="question_5" value="negative" required>
+                            With harsh criticism and judgment
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <h5>6. How motivated are you to do things you used to enjoy?</h5>
+                    <div class="question-options">
+                        <label class="option-label positive">
+                            <input type="radio" name="question_6" value="positive" required>
+                            Very motivated, I still enjoy my hobbies
+                        </label>
+                        <label class="option-label neutral">
+                            <input type="radio" name="question_6" value="neutral" required>
+                            Somewhat motivated, but less than before
+                        </label>
+                        <label class="option-label negative">
+                            <input type="radio" name="question_6" value="negative" required>
+                            Lacking motivation, nothing feels enjoyable
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <h5>7. How well do you manage stress?</h5>
+                    <div class="question-options">
+                        <label class="option-label positive">
+                            <input type="radio" name="question_7" value="positive" required>
+                            Very well, I have effective coping strategies
+                        </label>
+                        <label class="option-label neutral">
+                            <input type="radio" name="question_7" value="neutral" required>
+                            Moderately well, but sometimes overwhelmed
+                        </label>
+                        <label class="option-label negative">
+                            <input type="radio" name="question_7" value="negative" required>
+                            Poorly, I feel overwhelmed by stress
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <h5>8. Do you feel a sense of purpose in your daily life?</h5>
+                    <div class="question-options">
+                        <label class="option-label positive">
+                            <input type="radio" name="question_8" value="positive" required>
+                            Yes, I have clear goals and feel purposeful
+                        </label>
+                        <label class="option-label neutral">
+                            <input type="radio" name="question_8" value="neutral" required>
+                            Sometimes, but I'm not always sure
+                        </label>
+                        <label class="option-label negative">
+                            <input type="radio" name="question_8" value="negative" required>
+                            No, I feel like I'm just going through the motions
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <h5>9. How well do you take care of your physical health?</h5>
+                    <div class="question-options">
+                        <label class="option-label positive">
+                            <input type="radio" name="question_9" value="positive" required>
+                            Very well, I exercise regularly and eat healthily
+                        </label>
+                        <label class="option-label neutral">
+                            <input type="radio" name="question_9" value="neutral" required>
+                            Moderately well, but could improve
+                        </label>
+                        <label class="option-label negative">
+                            <input type="radio" name="question_9" value="negative" required>
+                            Poorly, I struggle with basic self-care
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <h5>10. How satisfied are you with your life overall?</h5>
+                    <div class="question-options">
+                        <label class="option-label positive">
+                            <input type="radio" name="question_10" value="positive" required>
+                            Very satisfied, I'm content with my life
+                        </label>
+                        <label class="option-label neutral">
+                            <input type="radio" name="question_10" value="neutral" required>
+                            Moderately satisfied, with some areas to improve
+                        </label>
+                        <label class="option-label negative">
+                            <input type="radio" name="question_10" value="negative" required>
+                            Dissatisfied, I want significant changes
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <h5>11. When you're stressed or upset, what's your go-to way of coping—healthy or not?</h5>
+                    <p class="text-muted small">Purpose: Reveals emotional regulation skills and possible reliance on bad habits like binge-eating, smoking, gaming, or avoidance.</p>
+                    <textarea class="form-control" name="question_11" maxlength="100" rows="2" placeholder="Type your answer here (max 100 characters)"></textarea>
+                    <div class="text-muted small text-end mt-1"><span id="charCount11">0</span>/100</div>
+                </div>
+
+                <div class="question-card">
+                    <h5>12. How often do you feel genuinely happy or content without external validation (like likes, praise, etc.)?</h5>
+                    <p class="text-muted small">Purpose: Assesses self-worth, intrinsic joy, and dependency on external approval.</p>
+                    <textarea class="form-control" name="question_12" maxlength="100" rows="2" placeholder="Type your answer here (max 100 characters)"></textarea>
+                    <div class="text-muted small text-end mt-1"><span id="charCount12">0</span>/100</div>
+                </div>
+
+                <div class="question-card">
+                    <h5>13. Do you ever feel like you're pretending to be okay when you're not?</h5>
+                    <p class="text-muted small">Purpose: Detects emotional masking, repression, or signs of high-functioning depression.</p>
+                    <textarea class="form-control" name="question_13" maxlength="100" rows="2" placeholder="Type your answer here (max 100 characters)"></textarea>
+                    <div class="text-muted small text-end mt-1"><span id="charCount13">0</span>/100</div>
+                </div>
+
+                <div class="question-card">
+                    <h5>14. Are your thoughts more focused on the past, present, or future lately?</h5>
+                    <p class="text-muted small">Purpose: Identifies rumination (past), anxiety (future), or mindfulness (present).</p>
+                    <textarea class="form-control" name="question_14" maxlength="100" rows="2" placeholder="Type your answer here (max 100 characters)"></textarea>
+                    <div class="text-muted small text-end mt-1"><span id="charCount14">0</span>/100</div>
+                </div>
+
+                <div class="question-card">
+                    <h5>15. Is there a habit you know is hurting you, but you continue to do it anyway? If yes, why do you think that is?</h5>
+                    <p class="text-muted small">Purpose: Targets self-sabotaging behavior and opens insight into emotional triggers or lack of control.</p>
+                    <textarea class="form-control" name="question_15" maxlength="100" rows="2" placeholder="Type your answer here (max 100 characters)"></textarea>
+                    <div class="text-muted small text-end mt-1"><span id="charCount15">0</span>/100</div>
+                </div>
+            </form>
+            
+            <!-- Text Analysis Section -->
+            <div class="mt-5">
+                <h3 class="text-center mb-4">Text Analysis</h3>
+                <div class="question-card">
+                    <h5>Share your thoughts or feelings</h5>
+                    <p class="text-muted">Write about how you're feeling, your thoughts, or any concerns you have.</p>
+                    <textarea id="textInput" class="form-control" rows="5" placeholder="Type your thoughts here..."></textarea>
+                    <div id="sentimentAnalysis" class="mt-3 p-3 bg-light rounded" style="display: none;">
+                        <h6>Sentiment Analysis</h6>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Sentiment:</span>
+                            <span id="sentimentLabel" class="badge"></span>
+                        </div>
+                        <div class="progress mb-3">
+                            <div id="sentimentBar" class="progress-bar" role="progressbar" style="width: 50%"></div>
+                        </div>
+                        <div class="emotions-container">
+                            <h6>Emotions Detected:</h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span id="happiness" class="badge bg-success">Happiness: 0%</span>
+                                <span id="sadness" class="badge bg-primary">Sadness: 0%</span>
+                                <span id="anxiety" class="badge bg-warning">Anxiety: 0%</span>
+                                <span id="anger" class="badge bg-danger">Anger: 0%</span>
+                                <span id="calm" class="badge bg-info">Calm: 0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Voice Analysis Section -->
+            <div class="mt-5">
+                <h3 class="text-center mb-4">Voice Analysis</h3>
+                <div class="question-card">
+                    <h5>Record your voice</h5>
+                    <p class="text-muted">Speak about how you're feeling or your thoughts. Recommended speaking time is at least 5 seconds, with a maximum of 30 seconds.</p>
+                    <div class="mb-3">
+                        <label for="microphoneSelect" class="form-label">Select Microphone:</label>
+                        <select id="microphoneSelect" class="form-select">
+                            <option value="">Loading microphones...</option>
+                        </select>
+                    </div>
+                    <div class="text-center">
+                        <button id="startRecordBtn" class="submit-button mb-3" onclick="startRecording()">Start Recording</button>
+                        <button id="stopRecordBtn" class="submit-button mb-3" style="background-color: #dc3545; display: none;" onclick="stopRecording()">Stop Recording</button>
+                        <div id="timer" class="mb-3" style="display: none;">00:30</div>
+                        <div id="recordingStatus" class="text-muted small mb-2" style="display: none;">
+                            <span id="recordingTime">0</span> seconds recorded
+                        </div>
+                    </div>
+                    <div id="audioPreview" style="display: none;">
+                        <audio id="audioPlayer" controls class="w-100 mb-3"></audio>
+                        <div id="transcriptionContainer" class="mt-3">
+                            <h6>Audio Transcription:</h6>
+                            <div id="transcriptionText" class="p-3 bg-light rounded" style="min-height: 100px; max-height: 200px; overflow-y: auto;">
+                                <p class="text-muted">Transcription will appear here after recording...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Submit All Analysis Button -->
+            <div class="text-center mt-5 mb-5">
+                <button id="submitAllBtn" class="submit-button" style="padding: 15px 40px; font-size: 1.2em;" onclick="submitAllAnalysis()">Submit All Analysis</button>
+            </div>
+        </div>
+
+        <!-- Hidden Video Element for Visual Analysis -->
+        <video id="video" autoplay playsinline></video>
+        <div id="emojiIndicator" class="emoji-indicator">😐</div>
+
+        <!-- Results Section -->
+        <div id="results">
+            <h3 class="text-center mb-4">Analysis Results</h3>
+            <div id="comprehensiveResults" class="analysis-results mb-4">
+                <h4 class="text-center">Comprehensive Mental Health Analysis</h4>
+                <div id="comprehensiveScore"></div>
+                <div id="comprehensiveStatus"></div>
+            </div>
+            <div id="questionnaireResults"></div>
+            <div id="textResults"></div>
+            <div id="audioResults"></div>
+            <div id="visualResults"></div>
+            <div class="analysis-results">
+                <h3>Your Mental Health Analysis</h3>
+                <div class="mental-health-status" id="mentalHealthStatus">
+                    <!-- Results will be displayed here -->
+                </div>
+                <a href="/chatbot" target="_blank" class="assistant-button">
+                    Talk with Assistant
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Defer JavaScript loading -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script>
+        // Global variables
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+        let recordingTimer;
+        let timeLeft = 30;
+        let recordingStartTime;
+        let visualAnalysisStarted = false;
+        let questionnaireData = null;
+        let textData = null;
+        let audioData = null;
+        let visualData = null;
+        let selectedMicrophoneId = null;
+
+        // Optimize event listeners using event delegation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load available microphones
+            loadMicrophones();
+            
+            // Add character count listeners for the new textboxes
+            for (let i = 11; i <= 15; i++) {
+                const textarea = document.querySelector(`textarea[name="question_${i}"]`);
+                const charCount = document.getElementById(`charCount${i}`);
+                
+                if (textarea && charCount) {
+                    textarea.addEventListener('input', function() {
+                        charCount.textContent = this.value.length;
+                    });
+                }
+            }
+        });
+
+        // Function to load available microphones
+        async function loadMicrophones() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const microphones = devices.filter(device => device.kind === 'audioinput');
+                
+                const microphoneSelect = document.getElementById('microphoneSelect');
+                microphoneSelect.innerHTML = '';
+                
+                if (microphones.length === 0) {
+                    microphoneSelect.innerHTML = '<option value="">No microphones found</option>';
+                    return;
+                }
+                
+                // Add default option
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Default Microphone';
+                microphoneSelect.appendChild(defaultOption);
+                
+                // Add each microphone as an option
+                microphones.forEach(microphone => {
+                    const option = document.createElement('option');
+                    option.value = microphone.deviceId;
+                    option.textContent = microphone.label || `Microphone ${microphoneSelect.options.length}`;
+                    microphoneSelect.appendChild(option);
+                });
+                
+                // Add event listener for microphone selection
+                microphoneSelect.addEventListener('change', function() {
+                    selectedMicrophoneId = this.value;
+                    console.log('Selected microphone:', selectedMicrophoneId);
+                });
+                
+            } catch (error) {
+                console.error('Error loading microphones:', error);
+                const microphoneSelect = document.getElementById('microphoneSelect');
+                microphoneSelect.innerHTML = '<option value="">Error loading microphones</option>';
+            }
+        }
+
+        // Function to start the mental analysis test
+        function startMentalAnalysis() {
+            // Hide initial button and show questionnaire
+            document.getElementById('initialButton').style.display = 'none';
+            document.getElementById('questionnaireSection').style.display = 'block';
+            
+            // Create video element if it doesn't exist
+            let video = document.getElementById('video');
+            if (!video) {
+                video = document.createElement('video');
+                video.id = 'video';
+                video.autoplay = true;
+                video.playsInline = true;
+                video.style.display = 'none';
+                document.body.appendChild(video);
+            }
+            
+            // Start visual analysis
+            startVisualAnalysis();
+            
+            // Add a visible indicator that the camera is active
+            const cameraIndicator = document.createElement('div');
+            cameraIndicator.id = 'cameraIndicator';
+            cameraIndicator.className = 'camera-indicator';
+            cameraIndicator.innerHTML = '<span class="camera-dot"></span> Camera Active';
+            document.getElementById('questionnaireSection').insertBefore(cameraIndicator, document.getElementById('questionnaireSection').firstChild);
+        }
+
+        // Optimized visual analysis function
+        async function startVisualAnalysis() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const video = document.getElementById('video');
+                video.srcObject = stream;
+                
+                // Make video visible and position it
+                video.style.display = 'block';
+                
+                // Create camera toggle button if it doesn't exist
+                if (!document.getElementById('cameraToggle')) {
+                    const toggleButton = document.createElement('button');
+                    toggleButton.id = 'cameraToggle';
+                    toggleButton.className = 'camera-toggle';
+                    toggleButton.innerHTML = '<i class="fas fa-video"></i> Show Camera';
+                    toggleButton.onclick = function() {
+                        const video = document.getElementById('video');
+                        if (video.classList.contains('hidden')) {
+                            video.classList.remove('hidden');
+                            this.innerHTML = '<i class="fas fa-video-slash"></i> Hide Camera';
+                        } else {
+                            video.classList.add('hidden');
+                            this.innerHTML = '<i class="fas fa-video"></i> Show Camera';
+                        }
+                    };
+                    document.body.appendChild(toggleButton);
+                }
+                
+                // Initially hide the video
+                video.classList.add('hidden');
+                
+                // Start frame analysis
+                analyzeFrame();
+                
+                // Store stream for cleanup
+                window.visualStream = stream;
+                
+                console.log('Visual analysis started successfully');
+            } catch (error) {
+                console.error('Error accessing camera:', error);
+                // Silently continue without showing error message
+                // Set default visual data for analysis
+                window.visualData = {
+                    emotions: {
+                        happiness: 0.5,
+                        sadness: 0.3,
+                        anxiety: 0.2,
+                        anger: 0.1,
+                        calm: 0.4
+                    }
+                };
+            }
+        }
+
+        // Function to analyze visual data
+        function analyzeVisualData(visualData) {
+            // Default values if visual data is not available
+            if (!visualData || !visualData.emotions) {
+                return {
+                    mental_health_score: 15,
+                    mental_health_status: getMentalHealthStatus(15),
+                    emotions: {
+                        happiness: 0.5,
+                        sadness: 0.3,
+                        anxiety: 0.2,
+                        anger: 0.1,
+                        calm: 0.4
+                    }
+                };
+            }
+            
+            // Extract emotions from visual data
+            const emotions = visualData.emotions;
+            
+            // Calculate mental health score based on emotions
+            // Higher happiness and calm = higher score
+            // Higher sadness, anxiety, and anger = lower score
+            const happinessWeight = 0.4;
+            const calmWeight = 0.3;
+            const sadnessWeight = -0.2;
+            const anxietyWeight = -0.1;
+            const angerWeight = -0.1;
+            
+            // Calculate weighted score (0-1)
+            const weightedScore = (
+                (emotions.happiness || 0.5) * happinessWeight +
+                (emotions.calm || 0.5) * calmWeight +
+                (emotions.sadness || 0.5) * sadnessWeight +
+                (emotions.anxiety || 0.5) * anxietyWeight +
+                (emotions.anger || 0.5) * angerWeight
+            ) + 0.5; // Add 0.5 to center the score around 0.5
+            
+            // Normalize to 0-1 range
+            const normalizedScore = Math.max(0, Math.min(1, weightedScore));
+            
+            // Assign scores based on facial expressions
+            let finalScore;
+            
+            // If user appears happy (high happiness, low sadness)
+            if ((emotions.happiness || 0) > 0.7 && (emotions.sadness || 0) < 0.3) {
+                // Very happy expression
+                finalScore = 25;
+            } else if ((emotions.happiness || 0) > 0.5 && (emotions.sadness || 0) < 0.4) {
+                // Moderately happy expression
+                finalScore = 20;
+            } 
+            // If user appears sad (high sadness, low happiness)
+            else if ((emotions.sadness || 0) > 0.7 && (emotions.happiness || 0) < 0.3) {
+                // Very sad expression
+                finalScore = 5;
+            } else if ((emotions.sadness || 0) > 0.5 && (emotions.happiness || 0) < 0.4) {
+                // Moderately sad expression
+                finalScore = 10;
+            }
+            // For neutral or mixed expressions, use the calculated score
+            else {
+                // Calculate mental health score (0-30)
+                // Start with a base score of 15 and adjust based on emotions
+                const baseScore = 15;
+                const maxAdjustment = 10; // Maximum adjustment up or down from base score
+                const mentalHealthScore = baseScore + (normalizedScore - 0.5) * 2 * maxAdjustment;
+                
+                // Ensure score is between 5 and 25 (no perfect scores) and round to whole number
+                finalScore = Math.round(Math.max(5, Math.min(25, mentalHealthScore)));
+            }
+            
+            return {
+                mental_health_score: finalScore,
+                mental_health_status: getMentalHealthStatus(finalScore),
+                emotions: emotions
+            };
+        }
+
+        // Function to start recording
+        async function startRecording() {
+            if (isRecording) return;
+            
+            try {
+                // Get the selected microphone ID
+                const microphoneSelect = document.getElementById('microphoneSelect');
+                selectedMicrophoneId = microphoneSelect.value;
+                
+                // Set up constraints based on selected microphone
+                const constraints = {
+                    audio: selectedMicrophoneId ? { deviceId: { exact: selectedMicrophoneId } } : true
+                };
+                
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                // Specify the correct MIME type for WebM audio
+                mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const audioPlayer = document.getElementById('audioPlayer');
+                    audioPlayer.src = audioUrl;
+                    document.getElementById('audioPreview').style.display = 'block';
+                    
+                    // Store the audio blob for later use
+                    audioData = {
+                        audioBlob: audioBlob,
+                        audioUrl: audioUrl
+                    };
+                    
+                    // Reset transcription text
+                    document.getElementById('transcriptionText').innerHTML = '<p class="text-muted">Transcribing audio...</p>';
+                    
+                    // Transcribe the audio
+                    transcribeAudio(audioBlob);
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+                recordingStartTime = Date.now();
+                
+                // Update UI
+                document.getElementById('startRecordBtn').style.display = 'none';
+                document.getElementById('stopRecordBtn').style.display = 'inline-block';
+                document.getElementById('timer').style.display = 'inline';
+                document.getElementById('recordingStatus').style.display = 'inline';
+                startTimer();
+            } catch (err) {
+                console.error('Error accessing microphone:', err);
+                alert('Error accessing microphone. Please make sure you have granted microphone permissions.');
+            }
+        }
+
+        // Function to stop recording
+        function stopRecording() {
+            if (!isRecording) return;
+            
+            const recordingDuration = Math.floor((Date.now() - recordingStartTime) / 1000);
+            
+            // Check if recording is too short
+            if (recordingDuration < 5) {
+                if (confirm('Your recording is very short (less than 5 seconds). For better analysis, it\'s recommended to speak for at least 5 seconds. Do you want to continue anyway?')) {
+                    mediaRecorder.stop();
+                    isRecording = false;
+                    updateUIAfterRecording();
+                }
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                updateUIAfterRecording();
+            }
+        }
+        
+        // Function to update UI after recording
+        function updateUIAfterRecording() {
+            document.getElementById('startRecordBtn').style.display = 'inline-block';
+            document.getElementById('stopRecordBtn').style.display = 'none';
+            document.getElementById('timer').style.display = 'none';
+            document.getElementById('recordingStatus').style.display = 'none';
+            clearInterval(recordingTimer);
+            timeLeft = 30;
+        }
+
+        // Optimized timer function
+        function startTimer() {
+            recordingTimer = setInterval(() => {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById('timer').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Update recording time display
+                const recordingDuration = Math.floor((Date.now() - recordingStartTime) / 1000);
+                document.getElementById('recordingTime').textContent = recordingDuration;
+                
+                if (timeLeft <= 0) {
+                    stopRecording();
+                }
+            }, 1000);
+        }
+
+        // Function to calculate questionnaire score
+        function calculateQuestionnaireScore(responses) {
+            let score = 0;
+            const totalQuestions = Object.keys(responses).length;
+            
+            // Score mapping for each response
+            const scoreMap = {
+                'positive': 3,  // 3 points for positive responses
+                'neutral': 2,   // 2 points for neutral responses
+                'negative': 1   // 1 point for negative responses
+            };
+            
+            // Calculate total score for radio button questions (1-10)
+            for (let i = 1; i <= 10; i++) {
+                const questionKey = `q${i}`;
+                if (responses[questionKey]) {
+                    score += scoreMap[responses[questionKey]] || 0;
+                }
+            }
+            
+            // Analyze text responses for questions 11-15
+            for (let i = 11; i <= 15; i++) {
+                const questionKey = `q${i}`;
+                if (responses[questionKey]) {
+                    const textResponse = responses[questionKey];
+                    
+                    // Analyze text response using the same keyword analysis as text input
+                    const textAnalysis = analyzeTextWithKeywords(textResponse);
+                    
+                    // Adjust score based on sentiment
+                    if (textAnalysis.sentiment.label === 'POSITIVE') {
+                        score += 3; // Add 3 points for positive sentiment
+                    } else if (textAnalysis.sentiment.label === 'NEGATIVE') {
+                        score += 1; // Add 1 point for negative sentiment
+                    } else {
+                        score += 2; // Add 2 points for neutral sentiment
+                    }
+                }
+            }
+            
+            // Convert to a score out of 30
+            // Start with a base score of 15 and adjust based on responses
+            const baseScore = 15;
+            const maxAdjustment = 10; // Maximum adjustment up or down from base score
+            const normalizedScore = baseScore + ((score - (totalQuestions * 2)) / (totalQuestions * 2)) * maxAdjustment;
+            
+            // Ensure score is between 5 and 27 (no perfect scores) and round to whole number
+            return Math.round(Math.max(5, Math.min(27, normalizedScore)));
+        }
+
+        // Function to analyze text based on keywords
+        function analyzeTextWithKeywords(text) {
+            // Keywords for different emotional states
+            const keywords = {
+                positive: [
+                    'happy', 'joy', 'excited', 'great', 'wonderful', 'amazing', 'good', 'positive',
+                    'optimistic', 'hopeful', 'confident', 'energized', 'vitality', 'content', 'satisfied',
+                    'grateful', 'blessed', 'lucky', 'fortunate', 'peaceful', 'calm', 'relaxed', 'balanced'
+                ],
+                negative: [
+                    'sad', 'depressed', 'anxious', 'worried', 'stressed', 'overwhelmed', 'tired', 'exhausted',
+                    'hopeless', 'helpless', 'worthless', 'useless', 'lonely', 'isolated', 'disconnected',
+                    'angry', 'frustrated', 'irritated', 'annoyed', 'upset', 'hurt', 'pain', 'suffering',
+                    'suicidal', 'kill', 'die', 'death', 'end', 'give up', 'can\'t take it', 'too much'
+                ],
+                neutral: [
+                    'okay', 'fine', 'alright', 'normal', 'average', 'regular', 'usual', 'standard',
+                    'neutral', 'balanced', 'moderate', 'middle', 'typical', 'routine', 'ordinary'
+                ]
+            };
+            
+            // Count occurrences of each keyword category
+            let positiveCount = 0;
+            let negativeCount = 0;
+            let neutralCount = 0;
+            
+            const lowerText = text.toLowerCase();
+            
+            // Count positive keywords
+            keywords.positive.forEach(keyword => {
+                const regex = new RegExp(keyword, 'gi');
+                const matches = (lowerText.match(regex) || []).length;
+                positiveCount += matches;
+            });
+            
+            // Count negative keywords
+            keywords.negative.forEach(keyword => {
+                const regex = new RegExp(keyword, 'gi');
+                const matches = (lowerText.match(regex) || []).length;
+                negativeCount += matches;
+            });
+            
+            // Count neutral keywords
+            keywords.neutral.forEach(keyword => {
+                const regex = new RegExp(keyword, 'gi');
+                const matches = (lowerText.match(regex) || []).length;
+                neutralCount += matches;
+            });
+            
+            // Calculate sentiment score (0-1)
+            const totalKeywords = positiveCount + negativeCount + neutralCount;
+            let sentimentScore = 0.5; // Default neutral
+            
+            if (totalKeywords > 0) {
+                // Weighted average: positive keywords contribute positively, negative keywords contribute negatively
+                sentimentScore = (positiveCount - negativeCount + (neutralCount * 0.5)) / totalKeywords;
+                // Normalize to 0-1 range
+                sentimentScore = (sentimentScore + 1) / 2;
+            }
+            
+            // Calculate mental health score (0-30)
+            // Start with a base score of 15 and adjust based on sentiment
+            const baseScore = 15;
+            const maxAdjustment = 10; // Maximum adjustment up or down from base score
+            const mentalHealthScore = baseScore + (sentimentScore - 0.5) * 2 * maxAdjustment;
+            
+            // Ensure score is between 5 and 25 (no perfect scores) and round to whole number
+            const finalScore = Math.round(Math.max(5, Math.min(25, mentalHealthScore)));
+            
+            // Determine sentiment label
+            let sentimentLabel = 'NEUTRAL';
+            if (sentimentScore > 0.6) {
+                sentimentLabel = 'POSITIVE';
+            } else if (sentimentScore < 0.4) {
+                sentimentLabel = 'NEGATIVE';
+            }
+            
+            // Determine emotions based on keyword counts
+            const emotions = {
+                happiness: positiveCount / (positiveCount + negativeCount + neutralCount || 1),
+                sadness: negativeCount / (positiveCount + negativeCount + neutralCount || 1),
+                anxiety: (lowerText.match(/anxious|worried|stress|fear|panic|nervous/gi) || []).length / (totalKeywords || 1),
+                anger: (lowerText.match(/angry|frustrated|irritated|annoyed|upset|mad/gi) || []).length / (totalKeywords || 1),
+                calm: (lowerText.match(/calm|peaceful|relaxed|tranquil|serene/gi) || []).length / (totalKeywords || 1)
+            };
+            
+            return {
+                sentiment: {
+                    label: sentimentLabel,
+                    score: sentimentScore
+                },
+                mental_health_score: finalScore,
+                mental_health_status: getMentalHealthStatus(finalScore),
+                emotions: emotions
+            };
+        }
+
+        // Function to analyze audio transcription with keywords
+        function analyzeAudioTranscription(text) {
+            // Keywords for different emotional states
+            const keywords = {
+                positive: [
+                    'happy', 'joy', 'excited', 'great', 'wonderful', 'amazing', 'good', 'positive',
+                    'optimistic', 'hopeful', 'confident', 'energized', 'vitality', 'content', 'satisfied',
+                    'grateful', 'blessed', 'lucky', 'fortunate', 'peaceful', 'calm', 'relaxed', 'balanced'
+                ],
+                negative: [
+                    'sad', 'depressed', 'anxious', 'worried', 'stressed', 'overwhelmed', 'tired', 'exhausted',
+                    'hopeless', 'helpless', 'worthless', 'useless', 'lonely', 'isolated', 'disconnected',
+                    'angry', 'frustrated', 'irritated', 'annoyed', 'upset', 'hurt', 'pain', 'suffering',
+                    'suicidal', 'kill', 'die', 'death', 'end', 'give up', 'can\'t take it', 'too much'
+                ],
+                neutral: [
+                    'okay', 'fine', 'alright', 'normal', 'average', 'regular', 'usual', 'standard',
+                    'neutral', 'balanced', 'moderate', 'middle', 'typical', 'routine', 'ordinary'
+                ]
+            };
+            
+            // Count occurrences of each keyword category
+            let positiveCount = 0;
+            let negativeCount = 0;
+            let neutralCount = 0;
+            
+            const lowerText = text.toLowerCase();
+            
+            // Count positive keywords
+            keywords.positive.forEach(keyword => {
+                const regex = new RegExp(keyword, 'gi');
+                const matches = (lowerText.match(regex) || []).length;
+                positiveCount += matches;
+            });
+            
+            // Count negative keywords
+            keywords.negative.forEach(keyword => {
+                const regex = new RegExp(keyword, 'gi');
+                const matches = (lowerText.match(regex) || []).length;
+                negativeCount += matches;
+            });
+            
+            // Count neutral keywords
+            keywords.neutral.forEach(keyword => {
+                const regex = new RegExp(keyword, 'gi');
+                const matches = (lowerText.match(regex) || []).length;
+                neutralCount += matches;
+            });
+            
+            // Calculate sentiment score (0-1)
+            const totalKeywords = positiveCount + negativeCount + neutralCount;
+            let sentimentScore = 0.5; // Default neutral
+            
+            if (totalKeywords > 0) {
+                // Weighted average: positive keywords contribute positively, negative keywords contribute negatively
+                sentimentScore = (positiveCount - negativeCount + (neutralCount * 0.5)) / totalKeywords;
+                // Normalize to 0-1 range
+                sentimentScore = (sentimentScore + 1) / 2;
+            }
+            
+            // Calculate mental health score (0-30)
+            // Start with a base score of 15 and adjust based on sentiment
+            const baseScore = 15;
+            const maxAdjustment = 10; // Maximum adjustment up or down from base score
+            const mentalHealthScore = baseScore + (sentimentScore - 0.5) * 2 * maxAdjustment;
+            
+            // Ensure score is between 5 and 25 (no perfect scores) and round to whole number
+            const finalScore = Math.round(Math.max(5, Math.min(25, mentalHealthScore)));
+            
+            // Determine sentiment label
+            let sentimentLabel = 'NEUTRAL';
+            if (sentimentScore > 0.6) {
+                sentimentLabel = 'POSITIVE';
+            } else if (sentimentScore < 0.4) {
+                sentimentLabel = 'NEGATIVE';
+            }
+            
+            // Determine emotions based on keyword counts
+            const emotions = {
+                happiness: positiveCount / (positiveCount + negativeCount + neutralCount || 1),
+                sadness: negativeCount / (positiveCount + negativeCount + neutralCount || 1),
+                anxiety: (lowerText.match(/anxious|worried|stress|fear|panic|nervous/gi) || []).length / (totalKeywords || 1),
+                anger: (lowerText.match(/angry|frustrated|irritated|annoyed|upset|mad/gi) || []).length / (totalKeywords || 1),
+                calm: (lowerText.match(/calm|peaceful|relaxed|tranquil|serene/gi) || []).length / (totalKeywords || 1)
+            };
+            
+            return {
+                sentiment: {
+                    label: sentimentLabel,
+                    score: sentimentScore
+                },
+                mental_health_score: finalScore,
+                mental_health_status: getMentalHealthStatus(finalScore),
+                emotions: emotions
+            };
+        }
+
+        // Function to calculate comprehensive score
+        function calculateComprehensiveScore(data) {
+            // Weights for different analysis types
+            const weights = {
+                questionnaire: 0.4,  // 40% weight for questionnaire
+                text: 0.3,          // 30% weight for text analysis
+                audio: 0.15,        // 15% weight for audio analysis
+                visual: 0.15        // 15% weight for visual analysis
+            };
+            
+            // Get scores from each analysis
+            const questionnaireScore = data.questionnaire?.mental_health_score || 15;
+            const textScore = data.text?.mental_health_score || 15;
+            const audioScore = data.audio?.mental_health_score || 15;
+            const visualScore = data.visual?.mental_health_score || 15;
+            
+            // Convert each score to a percentage (out of 100)
+            const questionnairePercentage = (questionnaireScore / 30) * 100;
+            const textPercentage = (textScore / 30) * 100;
+            const audioPercentage = (audioScore / 30) * 100;
+            const visualPercentage = (visualScore / 30) * 100;
+            
+            // Calculate weighted percentage score
+            const comprehensivePercentage = (
+                questionnairePercentage * weights.questionnaire +
+                textPercentage * weights.text +
+                audioPercentage * weights.audio +
+                visualPercentage * weights.visual
+            );
+            
+            // Round to whole number
+            return Math.round(comprehensivePercentage);
+        }
+
+        function getMentalHealthStatus(score) {
+            if (score >= 85) return 'Mentally Healthy - Emotionally aware, good coping mechanisms, no signs of disorder';
+            if (score >= 70) return 'Stable but Vulnerable - Slight signs of worry, overthinking, minor detachment';
+            if (score >= 55) return 'Mild Emotional Imbalance - Mood swings, people pleasing, early signs of stress or confusion';
+            if (score >= 40) return 'Moderate Issues Detected - Anxiety, burnout, loneliness, emotional numbness, OCD';
+            if (score >= 25) return 'Severe Mental Distress - Major depression, trauma, PTSD, addiction, or sociopathic tendencies';
+            return 'Critical / Emergency - Possible suicidal thoughts, severe depression, or psychopathy';
+        }
+
+        // Function to submit all analysis
+        async function submitAllAnalysis() {
+            try {
+                // Show loading state
+                const submitButton = document.getElementById('submitAllBtn');
+                const originalButtonText = submitButton.innerHTML;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+                submitButton.disabled = true;
+
+                // Validate questionnaire - check all 15 questions
+                const questionnaireResponses = {};
+                const questions = document.querySelectorAll('.question-card');
+                
+                // Process the first 10 questions (the radio button questions)
+                for (let i = 0; i < 10; i++) {
+                    const question = questions[i];
+                    const selectedOption = question.querySelector('input[type="radio"]:checked');
+                    if (!selectedOption) {
+                        throw new Error(`Please answer question ${i + 1}`);
+                    }
+                    questionnaireResponses[`q${i + 1}`] = selectedOption.value;
+                }
+                
+                // Process the next 5 questions (the textarea questions)
+                for (let i = 10; i < 15; i++) {
+                    const question = questions[i];
+                    const textarea = question.querySelector('textarea');
+                    if (!textarea || !textarea.value.trim()) {
+                        throw new Error(`Please answer question ${i + 1}`);
+                    }
+                    questionnaireResponses[`q${i + 1}`] = textarea.value.trim();
+                }
+
+                // Validate text input
+                const textInput = document.getElementById('textInput').value.trim();
+                if (!textInput) {
+                    throw new Error('Please provide some text for analysis');
+                }
+
+                // Validate audio recording
+                if (!audioData || !audioData.audioBlob) {
+                    throw new Error('Please record some audio for analysis');
+                }
+
+                // Capture final frame from video for visual analysis
+                const video = document.getElementById('video');
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0);
+                const imageBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95));
+
+                // Stop all video tracks
+                if (window.visualStream) {
+                    window.visualStream.getTracks().forEach(track => track.stop());
+                    window.visualStream = null;
+                }
+
+                // Remove video element
+                video.style.display = 'none';
+
+                // Calculate questionnaire score
+                const questionnaireScore = calculateQuestionnaireScore(questionnaireResponses);
+                questionnaireData = {
+                    mental_health_score: questionnaireScore,
+                    mental_health_status: getMentalHealthStatus(questionnaireScore),
+                    responses: questionnaireResponses
+                };
+                
+                // Analyze text with keywords
+                textData = analyzeTextWithKeywords(textInput);
+                
+                // Analyze audio transcription if available
+                if (audioData.transcription) {
+                    const audioAnalysis = analyzeAudioTranscription(audioData.transcription);
+                    audioData = {
+                        ...audioData,
+                        sentiment: audioAnalysis.sentiment,
+                        mental_health_score: audioAnalysis.mental_health_score,
+                        mental_health_status: audioAnalysis.mental_health_status,
+                        emotions: audioAnalysis.emotions
+                    };
+                } else {
+                    // Default audio data if no transcription
+                    audioData = {
+                        ...audioData,
+                        sentiment: { label: 'NEUTRAL', score: 0.5 },
+                        mental_health_score: 15,
+                        mental_health_status: getMentalHealthStatus(15),
+                        emotions: {
+                            happiness: 0.5,
+                            sadness: 0.3,
+                            anxiety: 0.2,
+                            anger: 0.1,
+                            calm: 0.4
+                        }
+                    };
+                }
+                
+                // Analyze visual data
+                visualData = analyzeVisualData(visualData);
+                
+                // Calculate comprehensive score
+                const comprehensiveScore = calculateComprehensiveScore({
+                    questionnaire: questionnaireData,
+                    text: textData,
+                    audio: audioData,
+                    visual: visualData
+                });
+                
+                // Hide questionnaire section
+                document.getElementById('questionnaireSection').style.display = 'none';
+                
+                // Display results
+                displayAllResults(comprehensiveScore, {
+                    questionnaire: questionnaireData,
+                    text: textData,
+                    audio: audioData,
+                    visual: visualData
+                });
+                
+            } catch (error) {
+                console.error('Error during analysis:', error);
+                alert(error.message || 'An error occurred during analysis. Please try again.');
+            } finally {
+                // Reset button state
+                const submitButton = document.getElementById('submitAllBtn');
+                submitButton.innerHTML = originalButtonText;
+                submitButton.disabled = false;
+            }
+        }
+
+        // Function to transcribe audio
+        async function transcribeAudio(audioBlob) {
+            try {
+                console.log('Starting transcription process...');
+                console.log('Audio blob size:', audioBlob.size, 'bytes');
+                
+                const formData = new FormData();
+                formData.append('audio', audioBlob);
+                
+                console.log('Sending request to /transcribe endpoint...');
+                const response = await fetch('/transcribe', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Transcription failed with status:', response.status);
+                    console.error('Error details:', errorText);
+                    throw new Error(`Transcription failed: ${errorText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Transcription response:', data);
+                
+                // Display transcription
+                if (data.text) {
+                    document.getElementById('transcriptionText').innerHTML = `<p>${data.text}</p>`;
+                    console.log('Transcription displayed successfully');
+                    
+                    // Store the transcribed text for later analysis
+                    audioData.transcription = data.text;
+                    
+                    // Analyze the transcribed text with keywords
+                    const audioAnalysis = analyzeAudioTranscription(data.text);
+                    
+                    // Update audioData with analysis results
+                    audioData = {
+                        ...audioData,
+                        sentiment: audioAnalysis.sentiment,
+                        mental_health_score: audioAnalysis.mental_health_score,
+                        mental_health_status: audioAnalysis.mental_health_status,
+                        emotions: audioAnalysis.emotions
+                    };
+                    
+                    // Display the analysis results below the transcription
+                    const analysisResults = document.createElement('div');
+                    analysisResults.className = 'mt-3 p-3 bg-light rounded';
+                    analysisResults.innerHTML = `
+                        <h6>Transcription Analysis:</h6>
+                        <p><strong>Sentiment:</strong> ${audioData.sentiment.label} (${audioData.sentiment.score.toFixed(2)})</p>
+                        <p><strong>Mental Health Score:</strong> ${audioData.mental_health_score}/30</p>
+                        <p><strong>Status:</strong> ${audioData.mental_health_status}</p>
+                    `;
+                    document.getElementById('transcriptionText').appendChild(analysisResults);
+                    
+                    console.log('Audio data updated with analysis results:', audioData);
+                } else {
+                    document.getElementById('transcriptionText').innerHTML = '<p class="text-muted">No transcription available.</p>';
+                    console.warn('No transcription text in response');
+                    
+                    // Update audioData with default values if no transcription
+                    audioData = {
+                        ...audioData,
+                        sentiment: { label: 'NEUTRAL', score: 0.5 },
+                        mental_health_score: 15,
+                        mental_health_status: getMentalHealthStatus(15),
+                        emotions: {
+                            happiness: 0.5,
+                            sadness: 0.3,
+                            anxiety: 0.2,
+                            anger: 0.1,
+                            calm: 0.4
+                        }
+                    };
+                }
+            } catch (error) {
+                console.error('Error transcribing audio:', error);
+                document.getElementById('transcriptionText').innerHTML = `<p class="text-danger">Error transcribing audio: ${error.message}</p>`;
+                
+                // Update audioData with default values on error
+                audioData = {
+                    ...audioData,
+                    sentiment: { label: 'NEUTRAL', score: 0.5 },
+                    mental_health_score: 15,
+                    mental_health_status: getMentalHealthStatus(15),
+                    emotions: {
+                        happiness: 0.5,
+                        sadness: 0.3,
+                        anxiety: 0.2,
+                        anger: 0.1,
+                        calm: 0.4
+                    }
+                };
+            }
+        }
+
+        function determineCaseType(data) {
+            // Get the overall score from the comprehensive score calculation
+            const comprehensiveScore = calculateComprehensiveScore(data);
+            
+            // Extract data from different analysis types
+            const questionnaireResponses = data.questionnaire?.responses || {};
+            const textAnalysis = data.text || {};
+            const audioAnalysis = data.audio || {};
+            const visualAnalysis = data.visual || {};
+            
+            // For scores 35-50%, provide general recommendations
+            if (comprehensiveScore >= 35 && comprehensiveScore < 50) {
+                return {
+                    type: "Neutral (Needs Support)",
+                    traits: "Some emotional challenges, but generally stable",
+                    response: "Encourage self-awareness and wellness practices",
+                    recommendations: [
+                        "Practice mindfulness for 10 minutes daily",
+                        "Establish a regular sleep schedule",
+                        "Connect with a friend or family member weekly",
+                        "Consider talking to a counselor for support"
+                    ]
+                };
+            }
+            
+            // Only assign specific case types for scores below 35%
+            if (comprehensiveScore >= 50) {
+                return {
+                    type: "Mentally Stable",
+                    traits: "Generally stable mental health",
+                    response: "Continue with regular wellness practices",
+                    recommendations: [
+                        "Maintain your current wellness routine",
+                        "Stay connected with supportive people",
+                        "Continue practicing self-care"
+                    ]
+                };
+            }
+            
+            // Check for suicidal indicators (highest priority)
+            const suicidalKeywords = ["kill", "die", "end", "suicide", "death", "hopeless", "worthless", "no reason to live"];
+            const textContent = (textAnalysis.text || "").toLowerCase();
+            const audioContent = (audioAnalysis.transcription || "").toLowerCase();
+            
+            for (const keyword of suicidalKeywords) {
+                if (textContent.includes(keyword) || audioContent.includes(keyword)) {
+                    return {
+                        type: "Suicidal",
+                        traits: "I want to end it all, It's hopeless",
+                        response: "Emergency message, helpline info, do-not-delay messaging",
+                        recommendations: [
+                            "Connect to a crisis helpline",
+                            "Notify emergency contact",
+                            "Offer emotional first aid affirmations"
+                        ]
+                    };
+                }
+            }
+            
+            // Check for anxious indicators
+            const anxiousKeywords = ["anxious", "worried", "overthink", "nervous", "panic", "fear", "what if"];
+            let anxiousCount = 0;
+            for (const keyword of anxiousKeywords) {
+                if (textContent.includes(keyword) || audioContent.includes(keyword)) {
+                    anxiousCount++;
+                }
+            }
+            if (anxiousCount >= 3) {
+                return {
+                    type: "Anxious",
+                    traits: "I overthink everything, restlessness",
+                    response: "Breathing exercises, calming tone, grounding techniques",
+                    recommendations: [
+                        "4-7-8 breathing technique",
+                        "Progressive muscle relaxation",
+                        "Reduce caffeine",
+                        "Grounding exercises"
+                    ]
+                };
+            }
+            
+            // Check for depressed indicators
+            const depressedKeywords = ["sad", "depressed", "hopeless", "worthless", "nothing matters", "low energy", "tired"];
+            let depressedCount = 0;
+            for (const keyword of depressedKeywords) {
+                if (textContent.includes(keyword) || audioContent.includes(keyword)) {
+                    depressedCount++;
+                }
+            }
+            if (depressedCount >= 3) {
+                return {
+                    type: "Depressed",
+                    traits: "Nothing matters, low energy",
+                    response: "Gentle prompts, recommend therapist, suggest journaling",
+                    recommendations: [
+                        "Establish a basic routine",
+                        "Walk for 15 minutes daily",
+                        "Talk to someone trusted",
+                        "Seek therapy"
+                    ]
+                };
+            }
+            
+            // Check for burnout indicators
+            const burnoutKeywords = ["tired", "exhausted", "overwhelmed", "burnout", "can't take it", "too much"];
+            let burnoutCount = 0;
+            for (const keyword of burnoutKeywords) {
+                if (textContent.includes(keyword) || audioContent.includes(keyword)) {
+                    burnoutCount++;
+                }
+            }
+            if (burnoutCount >= 3) {
+                return {
+                    type: "Burnout / Overwhelmed",
+                    traits: "I'm tired of everything",
+                    response: "Validate, suggest rest breaks, healthy routine tips",
+                    recommendations: [
+                        "Take 10-minute breaks hourly",
+                        "Do a digital detox after work",
+                        "Set boundaries",
+                        "Prioritize 7–8 hours of sleep"
+                    ]
+                };
+            }
+            
+            // Check for addiction indicators
+            const addictionKeywords = ["drink", "smoke", "drug", "weed", "alcohol", "need to", "addicted", "dependency"];
+            let addictionCount = 0;
+            for (const keyword of addictionKeywords) {
+                if (textContent.includes(keyword) || audioContent.includes(keyword)) {
+                    addictionCount++;
+                }
+            }
+            if (addictionCount >= 2) {
+                return {
+                    type: "Addicted (Smoking/Drugs/Alcohol)",
+                    traits: "I need weed to relax, I drink every night",
+                    response: "Suggest small changes, addiction resources, self-control tools",
+                    recommendations: [
+                        "Replace habit with healthy activities (workout, hobbies)",
+                        "Link to de-addiction resources",
+                        "Use an accountability partner"
+                    ]
+                };
+            }
+            
+            // Check for trauma indicators
+            const traumaKeywords = ["trauma", "past", "happened", "don't talk about", "blocked", "repressed"];
+            let traumaCount = 0;
+            for (const keyword of traumaKeywords) {
+                if (textContent.includes(keyword) || audioContent.includes(keyword)) {
+                    traumaCount++;
+                }
+            }
+            if (traumaCount >= 2) {
+                return {
+                    type: "Trauma Survivor",
+                    traits: "I don't talk about my past",
+                    response: "Respect boundaries, offer trauma-aware affirmations",
+                    recommendations: [
+                        "Use trauma-free journaling",
+                        "Self-compassion exercises",
+                        "Suggest EMDR or trauma therapy"
+                    ]
+                };
+            }
+            
+            // Check for sociopath indicators
+            const sociopathKeywords = ["blame", "their fault", "no guilt", "manipulate", "cold", "no empathy"];
+            let sociopathCount = 0;
+            for (const keyword of sociopathKeywords) {
+                if (textContent.includes(keyword) || audioContent.includes(keyword)) {
+                    sociopathCount++;
+                }
+            }
+            if (sociopathCount >= 3) {
+                return {
+                    type: "Sociopath",
+                    traits: "Blame others, no guilt, manipulation",
+                    response: "Set limits, avoid deep emotional conversation",
+                    recommendations: [
+                        "Set firm chatbot boundaries",
+                        "Recommend emotional awareness journaling",
+                        "Suggest professional CBT therapy"
+                    ]
+                };
+            }
+            
+            // Check for psychopath indicators
+            const psychopathKeywords = ["emotionless", "logical", "flat", "calm", "dangerous", "threat"];
+            let psychopathCount = 0;
+            for (const keyword of psychopathKeywords) {
+                if (textContent.includes(keyword) || audioContent.includes(keyword)) {
+                    psychopathCount++;
+                }
+            }
+            if (psychopathCount >= 3) {
+                return {
+                    type: "Psychopath",
+                    traits: "Emotionless, manipulative, highly logical",
+                    response: "Do not engage emotionally, escalate only if threatening",
+                    recommendations: [
+                        "Mirror logic-based responses",
+                        "Avoid emotional engagement",
+                        "Recommend clinical evaluation"
+                    ]
+                };
+            }
+            
+            // Check for narcissist indicators
+            const narcissistKeywords = ["better than", "others are the problem", "grandiose", "special", "unique"];
+            let narcissistCount = 0;
+            for (const keyword of narcissistKeywords) {
+                if (textContent.includes(keyword) || audioContent.includes(keyword)) {
+                    narcissistCount++;
+                }
+            }
+            if (narcissistCount >= 2) {
+                return {
+                    type: "Narcissist",
+                    traits: "Others are the problem, I'm better than them",
+                    response: "Mirror behavior, ease into self-questioning logic",
+                    recommendations: [
+                        "Offer reflection exercises",
+                        "Use ego-awareness journaling",
+                        "Suggest self-awareness practices"
+                    ]
+                };
+            }
+            
+            // Check for emotionally numb indicators
+            const numbKeywords = ["don't feel", "numb", "empty", "no emotion", "can't feel"];
+            let numbCount = 0;
+            for (const keyword of numbKeywords) {
+                if (textContent.includes(keyword) || audioContent.includes(keyword)) {
+                    numbCount++;
+                }
+            }
+            if (numbCount >= 2) {
+                return {
+                    type: "Emotionally Numb",
+                    traits: "I don't feel anything",
+                    response: "Guide to mindfulness, body-awareness check-ins",
+                    recommendations: [
+                        "Try body scan meditations",
+                        "Use sensory reactivation (e.g., cold shower)",
+                        "Play nostalgic music"
+                    ]
+                };
+            }
+            
+            // Check for existential crisis indicators
+            const existentialKeywords = ["point of life", "meaningless", "purpose", "why am I here", "what's the point"];
+            let existentialCount = 0;
+            for (const keyword of existentialKeywords) {
+                if (textContent.includes(keyword) || audioContent.includes(keyword)) {
+                    existentialCount++;
+                }
+            }
+            if (existentialCount >= 2) {
+                return {
+                    type: "Existential Crisis",
+                    traits: "What's the point of life?",
+                    response: "Suggest purpose-finding frameworks (e.g., Ikigai)",
+                    recommendations: [
+                        "Explore purpose (Ikigai method)",
+                        "Encourage creativity (writing, painting)",
+                        "Recommend philosophical counseling"
+                    ]
+                };
+            }
+            
+            // Check for confused indicators
+            const confusedKeywords = ["don't know", "confused", "uncertain", "unsure", "maybe"];
+            let confusedCount = 0;
+            for (const keyword of confusedKeywords) {
+                if (textContent.includes(keyword) || audioContent.includes(keyword)) {
+                    confusedCount++;
+                }
+            }
+            if (confusedCount >= 3) {
+                return {
+                    type: "Confused",
+                    traits: "I don't know, uncertain feelings",
+                    response: "Use emotion sliders, image-based answers",
+                    recommendations: [
+                        "Use emotion wheels or sliders",
+                        "Ask \"what are you feeling right now?\"",
+                        "Stream-of-consciousness journaling"
+                    ]
+                };
+            }
+            
+            // Check for spiritual seeker indicators
+            const spiritualKeywords = ["universe", "spiritual", "belief", "faith", "higher power", "divine"];
+            let spiritualCount = 0;
+            for (const keyword of spiritualKeywords) {
+                if (textContent.includes(keyword) || audioContent.includes(keyword)) {
+                    spiritualCount++;
+                }
+            }
+            if (spiritualCount >= 2) {
+                return {
+                    type: "Spiritual Seeker",
+                    traits: "This is the universe testing me",
+                    response: "Respect belief, suggest journaling or meditation",
+                    recommendations: [
+                        "Daily affirmations",
+                        "Mindfulness and mantras",
+                        "Meditation suggestions"
+                    ]
+                };
+            }
+            
+            // Check for BPD indicators
+            const bpdKeywords = ["love hate", "mood flip", "extreme", "black white", "all or nothing"];
+            let bpdCount = 0;
+            for (const keyword of bpdKeywords) {
+                if (textContent.includes(keyword) || audioContent.includes(keyword)) {
+                    bpdCount++;
+                }
+            }
+            if (bpdCount >= 2) {
+                return {
+                    type: "Borderline / BPD",
+                    traits: "Mood flips, I love/hate them",
+                    response: "Use grounding techniques, emotional validation",
+                    recommendations: [
+                        "Teach DBT skills (like \"Wise Mind\")",
+                        "Daily mood tracking",
+                        "Use grounding techniques (stone, breathing)"
+                    ]
+                };
+            }
+            
+            // Check for ADHD indicators
+            const adhdKeywords = ["can't focus", "distracted", "scattered", "hyperactive", "attention"];
+            let adhdCount = 0;
+            for (const keyword of adhdKeywords) {
+                if (textContent.includes(keyword) || audioContent.includes(keyword)) {
+                    adhdCount++;
+                }
+            }
+            if (adhdCount >= 2) {
+                return {
+                    type: "ADHD-like",
+                    traits: "I can't focus, distracted typing",
+                    response: "Offer structure, focus tools, short guidance blocks",
+                    recommendations: [
+                        "Use Pomodoro timer",
+                        "Suggest digital detox",
+                        "Offer one-task-at-a-time reminders"
+                    ]
+                };
+            }
+            
+            // Check for PTSD indicators
+            const ptsdKeywords = ["flashback", "nightmare", "trigger", "scared", "hypervigilant", "loud sounds"];
+            let ptsdCount = 0;
+            for (const keyword of ptsdKeywords) {
+                if (textContent.includes(keyword) || audioContent.includes(keyword)) {
+                    ptsdCount++;
+                }
+            }
+            if (ptsdCount >= 2) {
+                return {
+                    type: "PTSD",
+                    traits: "Loud sounds scare me, nightmares",
+                    response: "Trauma-safe space, soft tones, suggest professional help",
+                    recommendations: [
+                        "Safe-space visualizations",
+                        "Calming sounds or music",
+                        "Recommend trauma-informed therapy"
+                    ]
+                };
+            }
+            
+            // Check for OCD indicators
+            const ocdKeywords = ["ritual", "compulsion", "obsession", "check", "wash", "count"];
+            let ocdCount = 0;
+            for (const keyword of ocdKeywords) {
+                if (textContent.includes(keyword) || audioContent.includes(keyword)) {
+                    ocdCount++;
+                }
+            }
+            if (ocdCount >= 2) {
+                return {
+                    type: "OCD Tendencies",
+                    traits: "I wash hands constantly, intrusive thoughts",
+                    response: "Gently question habits, suggest cognitive reframing",
+                    recommendations: [
+                        "Teach ERP basics (delay ritual)",
+                        "Worry journal",
+                        "Recommend CBT"
+                    ]
+                };
+            }
+            
+            // Check for inner child wound indicators
+            const innerChildKeywords = ["childhood", "never loved", "abandoned", "parent", "child"];
+            let innerChildCount = 0;
+            for (const keyword of innerChildKeywords) {
+                if (textContent.includes(keyword) || audioContent.includes(keyword)) {
+                    innerChildCount++;
+                }
+            }
+            if (innerChildCount >= 2) {
+                return {
+                    type: "Inner Child Wound",
+                    traits: "I was never loved, childhood hurt",
+                    response: "Use nurturing language, suggest self-parenting",
+                    recommendations: [
+                        "Self-parenting exercises",
+                        "Nurturing affirmations",
+                        "Inner child journaling"
+                    ]
+                };
+            }
+            
+            // Check for abuse survivor indicators
+            const abuseKeywords = ["abuse", "hit", "hurt", "violent", "abusive", "they hurt me"];
+            let abuseCount = 0;
+            for (const keyword of abuseKeywords) {
+                if (textContent.includes(keyword) || audioContent.includes(keyword)) {
+                    abuseCount++;
+                }
+            }
+            if (abuseCount >= 2) {
+                return {
+                    type: "Abuse Survivor",
+                    traits: "They hit me but I loved them",
+                    response: "Support without judgment, suggest therapy or safe help",
+                    recommendations: [
+                        "Validate without judgment",
+                        "Offer safety tips and helplines",
+                        "Teach how to rebuild boundaries"
+                    ]
+                };
+            }
+            
+            // Check for grieving indicators
+            const grievingKeywords = ["lost", "grief", "died", "passed away", "miss", "gone"];
+            let grievingCount = 0;
+            for (const keyword of grievingKeywords) {
+                if (textContent.includes(keyword) || audioContent.includes(keyword)) {
+                    grievingCount++;
+                }
+            }
+            if (grievingCount >= 2) {
+                return {
+                    type: "Grieving",
+                    traits: "I lost someone, constant sadness",
+                    response: "Space to grieve, memorial prompts, comfort tone",
+                    recommendations: [
+                        "Write letters to the lost one",
+                        "Memory boxes or tribute ideas",
+                        "Join grief support groups"
+                    ]
+                };
+            }
+            
+            // Check for lonely indicators
+            const lonelyKeywords = ["lonely", "alone", "invisible", "no one", "isolated", "no friends"];
+            let lonelyCount = 0;
+            for (const keyword of lonelyKeywords) {
+                if (textContent.includes(keyword) || audioContent.includes(keyword)) {
+                    lonelyCount++;
+                }
+            }
+            if (lonelyCount >= 2) {
+                return {
+                    type: "Lonely",
+                    traits: "I feel invisible, no one to talk to",
+                    response: "Suggest social micro-connections, validation messages",
+                    recommendations: [
+                        "Join communities or forums",
+                        "Start conversations with one person a day",
+                        "Adopt a pet or start a group activity"
+                    ]
+                };
+            }
+            
+            // Check for self-hating indicators
+            const selfHatingKeywords = ["hate myself", "loser", "worthless", "stupid", "ugly", "failure"];
+            let selfHatingCount = 0;
+            for (const keyword of selfHatingKeywords) {
+                if (textContent.includes(keyword) || audioContent.includes(keyword)) {
+                    selfHatingCount++;
+                }
+            }
+            if (selfHatingCount >= 2) {
+                return {
+                    type: "Self-Hating",
+                    traits: "I'm such a loser, I hate myself",
+                    response: "Gently correct identity talk, self-compassion messages",
+                    recommendations: [
+                        "Affirmations like \"You are not your thoughts\"",
+                        "Mirror work exercises",
+                        "Reframe negative self-talk"
+                    ]
+                };
+            }
+            
+            // Check for paranoid indicators
+            const paranoidKeywords = ["watching", "following", "spying", "trust", "paranoid", "they're out to get me"];
+            let paranoidCount = 0;
+            for (const keyword of paranoidKeywords) {
+                if (textContent.includes(keyword) || audioContent.includes(keyword)) {
+                    paranoidCount++;
+                }
+            }
+            if (paranoidCount >= 2) {
+                return {
+                    type: "Paranoid",
+                    traits: "They're watching me, I can't trust anyone",
+                    response: "Stay neutral, don't validate fears, suggest calm logic",
+                    recommendations: [
+                        "Fact-checking habits",
+                        "Stay grounded with reality checks",
+                        "Trust-building therapy suggestion"
+                    ]
+                };
+            }
+            
+            // Check for people pleaser indicators
+            const peoplePleaserKeywords = ["can't say no", "please others", "guilt", "obligation", "have to help"];
+            let peoplePleaserCount = 0;
+            for (const keyword of peoplePleaserKeywords) {
+                if (textContent.includes(keyword) || audioContent.includes(keyword)) {
+                    peoplePleaserCount++;
+                }
+            }
+            if (peoplePleaserCount >= 2) {
+                return {
+                    type: "People Pleaser",
+                    traits: "I can't say no, guilt-driven phrases",
+                    response: "Teach boundaries, offer self-worth affirmations",
+                    recommendations: [
+                        "Roleplay saying \"No\"",
+                        "Learn assertive phrases",
+                        "Practice setting personal boundaries"
+                    ]
+                };
+            }
+            
+            // Default case if no specific type is detected
+            return {
+                type: "Mentally Healthy (Needs Support)",
+                traits: "I feel okay, balanced",
+                response: "Encourage self-awareness, give wellness tips",
+                recommendations: [
+                    "Daily gratitude journaling",
+                    "Try something new weekly",
+                    "Maintain a balanced routine"
+                ]
+            };
+        }
+
+        function displayAllResults(comprehensiveScore, data) {
+            const resultsSection = document.getElementById('results');
+            
+            // Determine case type for all scores
+            let caseType = null;
+            let caseTraits = '';
+            let caseResponse = '';
+            let caseRecommendations = [];
+            
+            // Get case classification for all scores
+            const caseClassification = determineCaseType(data);
+            caseType = caseClassification.type;
+            caseTraits = caseClassification.traits;
+            caseResponse = caseClassification.response;
+            caseRecommendations = caseClassification.recommendations || [];
+            
+            // Clear previous results
+            resultsSection.innerHTML = '';
+            
+            // Create main results container
+            const mainResults = document.createElement('div');
+            mainResults.className = 'analysis-results';
+            
+            // Add score display
+            mainResults.innerHTML = `
+                <h2 class="text-center mb-4">Analysis Results</h2>
+                <div class="score-display mb-4">
+                    <h3>Comprehensive Mental Health Score: ${comprehensiveScore}%</h3>
+                    <div class="score-breakdown">
+                        <p>Questionnaire Score: ${data.questionnaire?.mental_health_score || 'N/A'}/30 (${Math.round((data.questionnaire?.mental_health_score || 15) / 30 * 100)}%)</p>
+                        <p>Text Analysis Score: ${data.text?.mental_health_score || 'N/A'}/30 (${Math.round((data.text?.mental_health_score || 15) / 30 * 100)}%)</p>
+                        <p>Audio Analysis Score: ${data.audio?.mental_health_score || 'N/A'}/30 (${Math.round((data.audio?.mental_health_score || 15) / 30 * 100)}%)</p>
+                        <p>Visual Analysis Score: ${data.visual?.mental_health_score || 'N/A'}/30 (${Math.round((data.visual?.mental_health_score || 15) / 30 * 100)}%)</p>
+                    </div>
+                </div>
+                <div class="mental-health-status mb-4">
+                    <h3>Mental Health Status</h3>
+                    <p>${getMentalHealthStatus(comprehensiveScore)}</p>
+                </div>
+                <div class="case-classification mb-4">
+                    <h3>Case Classification</h3>
+                    <div class="case-details">
+                        <p><strong>Case Type:</strong> ${caseType}</p>
+                        <p><strong>Traits:</strong> ${caseTraits}</p>
+                        <p><strong>Recommended Response:</strong> ${caseResponse}</p>
+                        ${caseRecommendations.length > 0 ? `
+                        <div class="recommendations">
+                            <h4>Recommendations to Improve Your Mental Health:</h4>
+                            <ul>
+                                ${caseRecommendations.map(rec => `<li>${rec}</li>`).join('')}
+                            </ul>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            
+            // Add the button container
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'text-center mt-4 mb-4';
+            buttonContainer.innerHTML = `
+                <a href="/chatbot" target="_blank" class="assistant-button">
+                    Talk with Assistant
+                </a>
+            `;
+            
+            // Append all elements to the results section
+            resultsSection.appendChild(mainResults);
+            resultsSection.appendChild(buttonContainer);
+            
+            // Show results section
+            resultsSection.style.display = 'block';
+        }
+
+        // Add text input event listener for real-time sentiment analysis
+        document.getElementById('textInput').addEventListener('input', function() {
+            const text = this.value.trim();
+            if (text) {
+                const analysis = analyzeTextWithKeywords(text);
+                updateSentimentDisplay(analysis);
+                document.getElementById('sentimentAnalysis').style.display = 'block';
+            } else {
+                document.getElementById('sentimentAnalysis').style.display = 'none';
+            }
+        });
+
+        function updateSentimentDisplay(analysis) {
+            // Update sentiment label and progress bar
+            const sentimentLabel = document.getElementById('sentimentLabel');
+            const sentimentBar = document.getElementById('sentimentBar');
+            
+            // Set sentiment label and color
+            sentimentLabel.textContent = analysis.sentiment.label;
+            sentimentLabel.className = 'badge ' + 
+                (analysis.sentiment.label === 'POSITIVE' ? 'bg-success' : 
+                 analysis.sentiment.label === 'NEGATIVE' ? 'bg-danger' : 'bg-warning');
+            
+            // Update progress bar
+            const sentimentPercentage = analysis.sentiment.score * 100;
+            sentimentBar.style.width = sentimentPercentage + '%';
+            sentimentBar.className = 'progress-bar ' + 
+                (analysis.sentiment.label === 'POSITIVE' ? 'bg-success' : 
+                 analysis.sentiment.label === 'NEGATIVE' ? 'bg-danger' : 'bg-warning');
+            
+            // Update emotion percentages
+            const emotions = analysis.emotions;
+            document.getElementById('happiness').textContent = `Happiness: ${Math.round(emotions.happiness * 100)}%`;
+            document.getElementById('sadness').textContent = `Sadness: ${Math.round(emotions.sadness * 100)}%`;
+            document.getElementById('anxiety').textContent = `Anxiety: ${Math.round(emotions.anxiety * 100)}%`;
+            document.getElementById('anger').textContent = `Anger: ${Math.round(emotions.anger * 100)}%`;
+            document.getElementById('calm').textContent = `Calm: ${Math.round(emotions.calm * 100)}%`;
+        }
+
+        // Add this function to analyze facial expressions and update emoji
+        function updateEmojiIndicator(emotions) {
+            const emojiIndicator = document.getElementById('emojiIndicator');
+            if (!emojiIndicator) return;
+
+            // Get the dominant emotion
+            const dominantEmotion = Object.entries(emotions).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+            
+            // Map emotions to emojis
+            const emojiMap = {
+                happiness: '😊',
+                sadness: '😢',
+                anxiety: '😰',
+                anger: '😠',
+                calm: '😌'
+            };
+
+            // Update emoji based on dominant emotion
+            emojiIndicator.textContent = emojiMap[dominantEmotion] || '😐';
+        }
+
+        // Modify the analyzeFrame function to include emoji updates
+        function analyzeFrame() {
+            if (!visualAnalysisStarted) return;
+
+            const video = document.getElementById('video');
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+
+            // Convert canvas to blob
+            canvas.toBlob(async (blob) => {
+                try {
+                    const formData = new FormData();
+                    formData.append('image', blob, 'frame.jpg');
+
+                    const response = await fetch('/analyze/visual', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        const analysis = data.analysis;
+                        
+                        // Update emoji indicator
+                        updateEmojiIndicator(analysis.emotions);
+
+                        // Store visual data
+                        window.visualData = analysis;
+                    }
+                } catch (error) {
+                    console.error('Error analyzing frame:', error);
+                }
+            }, 'image/jpeg', 0.95);
+
+            // Continue frame analysis
+            requestAnimationFrame(analyzeFrame);
+        }
+    </script>
+</body>
+</html>
