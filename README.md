@@ -1,2 +1,2 @@
-# naan-mudhalavan
-ai content generator 
+# Naan-Mudhalavan
+AI Powered Sentimental Analysis
