@@ -1,0 +1,4 @@
+flask==2.0.1
+gpt4all==2.8.2
+nltk==3.8.1
+python-dotenv==0.19.0 
